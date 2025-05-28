@@ -10,11 +10,13 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Line,Scatter } from 'react-chartjs-2';
 import { Menu, MenuItem, Button, Divider } from '@mui/material';
 import styled from '@emotion/styled';
 // import { useTheme } from '@mui/material/styles';
-import AgentVisualizer from './fence2D';
+import TrajectoryVisualization from './TrajectoryVisualization';
+import * as client from './client/main';
+import TabbedInterface from './tab';
 
 // 注册Chart.js组件
 ChartJS.register(
@@ -158,68 +160,7 @@ const App = () => {
   };
 
   return (
-    <AppContainer>
-      <MenuBar>
-        <div className="flex items-center space-x-4">
-          <Button 
-            id="menu-button" 
-            aria-controls={isMenuOpen ? 'menu-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={isMenuOpen ? 'true' : undefined}
-            onClick={handleMenuOpen}
-            color="inherit"
-          >
-            菜单
-          </Button>
-          {/* <h1 className="text-lg font-bold">fence-app</h1> */}
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button color="inherit">设置</Button>
-          <Button color="inherit">账户</Button>
-        </div>
-      </MenuBar>
-
-      {/* 菜单下拉框 */}
-      <Menu
-        id="menu-menu"
-        anchorEl={anchorEl}
-        open={isMenuOpen}
-        onClose={handleMenuClose}
-        MenuListProps={{
-          'aria-labelledby': 'menu-button',
-        }}
-      >
-        <MenuItem onClick={handleMenuClose}>数据导入</MenuItem>
-        <MenuItem onClick={handleMenuClose}>导出报表</MenuItem>
-        <Divider />
-        <MenuItem onClick={handleMenuClose}>帮助中心</MenuItem>
-        <MenuItem onClick={handleMenuClose}>关于我们</MenuItem>
-      </Menu>
-
-      <ContentArea>
-        <LeftPanel>
-          {/* <canvas ref={canvasRef} className="rounded-lg shadow-lg" /> */}
-          <AgentVisualizer 
-            data={sampleData}
-            agentColors={['#3498db', '#e74c3c', '#2ecc71']}
-          />
-        </LeftPanel>
-        <RightPanel>
-          <ChartContainer>
-            <h3 className="text-white mb-2">性能指标趋势</h3>
-            <Line data={generateData()} options={{ responsive: false, maintainAspectRatio: false }} />
-          </ChartContainer>
-          <ChartContainer>
-            <h3 className="text-white mb-2">资源使用情况</h3>
-            <Line data={generateData()} options={{ responsive: false, maintainAspectRatio: false }} />
-          </ChartContainer>
-          <ChartContainer>
-            <h3 className="text-white mb-2">系统负载分析</h3>
-            <Line data={generateData()} options={{ responsive: false, maintainAspectRatio: false }} />
-          </ChartContainer>
-        </RightPanel>
-      </ContentArea>
-    </AppContainer>
+    <TabbedInterface></TabbedInterface>
   );
 };
 
