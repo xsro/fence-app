@@ -157,7 +157,7 @@ const App = () => {
           >
             菜单
           </Button>
-          <h1 className="text-lg font-bold">数据可视化平台</h1>
+          {/* <h1 className="text-lg font-bold">fence-app</h1> */}
         </div>
         <div className="flex items-center space-x-4">
           <Button color="inherit">设置</Button>
