@@ -931,6 +931,7 @@ dependencies = [
 name = "fence-app"
 version = "0.1.0"
 dependencies = [
+ "dirs",
  "mas",
  "serde",
  "serde_json",

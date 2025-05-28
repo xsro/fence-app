@@ -14,6 +14,7 @@ import { Line } from 'react-chartjs-2';
 import { Menu, MenuItem, Button, Divider } from '@mui/material';
 import styled from '@emotion/styled';
 // import { useTheme } from '@mui/material/styles';
+import AgentVisualizer from './fence2D';
 
 // 注册Chart.js组件
 ChartJS.register(
@@ -142,6 +143,19 @@ const App = () => {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+  const sampleData = {
+    "time": [0.0],
+    "state": {
+      "agents": [[7.0, 10.0], [3.0, 10.0], [-1.0, 10.0]],
+      "target": [3.0, 10.0]
+    },
+    "signals": [
+      {
+        "distance": {},
+        "rotations": [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
+      }
+    ]
+  };
 
   return (
     <AppContainer>
@@ -184,7 +198,11 @@ const App = () => {
 
       <ContentArea>
         <LeftPanel>
-          <canvas ref={canvasRef} className="rounded-lg shadow-lg" />
+          {/* <canvas ref={canvasRef} className="rounded-lg shadow-lg" /> */}
+          <AgentVisualizer 
+            data={sampleData}
+            agentColors={['#3498db', '#e74c3c', '#2ecc71']}
+          />
         </LeftPanel>
         <RightPanel>
           <ChartContainer>
