@@ -1,51 +1,208 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+// src/App.tsx
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+import { Menu, MenuItem, Button, Divider } from '@mui/material';
+import styled from '@emotion/styled';
+// import { useTheme } from '@mui/material/styles';
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+// 注册Chart.js组件
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+// 自定义样式组件
+const AppContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+`;
+
+const MenuBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background-color: #1e293b;
+  color: white;
+  height: 3rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const ContentArea = styled.div`
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+`;
+
+const LeftPanel = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding: 1rem;
+  background-color: #0f172a;
+  @media (max-width: 768px) {
+    display: none;
   }
+`;
+
+const RightPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1rem;
+  gap: 1rem;
+  background-color: #0f172a;
+`;
+
+const ChartContainer = styled.div`
+  flex: 1;
+  background-color: #1e293b;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+`;
+
+// 应用主组件
+const App = () => {
+  // const theme = useTheme();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const isMenuOpen = Boolean(anchorEl);
+
+  // 生成随机数据
+  const generateData = () => {
+    const labels = Array.from({ length: 12 }, (_, i) => `Data ${i + 1}`);
+    const data = Array.from({ length: 12 }, () => Math.floor(Math.random() * 100));
+    return { labels, datasets: [{ data, borderColor: '#3b82f6', tension: 0.4 }] };
+  };
+
+  // Canvas初始化
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // 设置Canvas尺寸为正方形并适应容器
+    const container = canvas.parentElement;
+    if (!container) return;
+    
+    const size = Math.min(container.clientWidth, container.clientHeight);
+    canvas.width = size;
+    canvas.height = size;
+
+    // 绘制示例图形
+    ctx.fillStyle = '#3b82f6';
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 添加响应式调整
+    const handleResize = () => {
+      const newSize = Math.min(container.clientWidth, container.clientHeight);
+      canvas.width = newSize;
+      canvas.height = newSize;
+      
+      // 重新绘制
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#3b82f6';
+      ctx.beginPath();
+      ctx.arc(newSize / 2, newSize / 2, newSize / 4, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // 菜单处理
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <AppContainer>
+      <MenuBar>
+        <div className="flex items-center space-x-4">
+          <Button 
+            id="menu-button" 
+            aria-controls={isMenuOpen ? 'menu-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={isMenuOpen ? 'true' : undefined}
+            onClick={handleMenuOpen}
+            color="inherit"
+          >
+            菜单
+          </Button>
+          <h1 className="text-lg font-bold">数据可视化平台</h1>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Button color="inherit">设置</Button>
+          <Button color="inherit">账户</Button>
+        </div>
+      </MenuBar>
 
-      <div className="row">
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
+      {/* 菜单下拉框 */}
+      <Menu
+        id="menu-menu"
+        anchorEl={anchorEl}
+        open={isMenuOpen}
+        onClose={handleMenuClose}
+        MenuListProps={{
+          'aria-labelledby': 'menu-button',
         }}
       >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+        <MenuItem onClick={handleMenuClose}>数据导入</MenuItem>
+        <MenuItem onClick={handleMenuClose}>导出报表</MenuItem>
+        <Divider />
+        <MenuItem onClick={handleMenuClose}>帮助中心</MenuItem>
+        <MenuItem onClick={handleMenuClose}>关于我们</MenuItem>
+      </Menu>
+
+      <ContentArea>
+        <LeftPanel>
+          <canvas ref={canvasRef} className="rounded-lg shadow-lg" />
+        </LeftPanel>
+        <RightPanel>
+          <ChartContainer>
+            <h3 className="text-white mb-2">性能指标趋势</h3>
+            <Line data={generateData()} options={{ responsive: false, maintainAspectRatio: false }} />
+          </ChartContainer>
+          <ChartContainer>
+            <h3 className="text-white mb-2">资源使用情况</h3>
+            <Line data={generateData()} options={{ responsive: false, maintainAspectRatio: false }} />
+          </ChartContainer>
+          <ChartContainer>
+            <h3 className="text-white mb-2">系统负载分析</h3>
+            <Line data={generateData()} options={{ responsive: false, maintainAspectRatio: false }} />
+          </ChartContainer>
+        </RightPanel>
+      </ContentArea>
+    </AppContainer>
   );
-}
+};
 
 export default App;
