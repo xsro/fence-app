@@ -20,6 +20,11 @@ fn get_config() -> Result<config::Config, String> {
     }
 }
 
+#[tauri::command]
+fn read_file(path: String) -> Result<String, String> {
+    std::fs::read_to_string(path).map_err(|e| e.to_string())
+}
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -27,7 +32,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![greet,log_message,get_config])
+        .invoke_handler(tauri::generate_handler![greet,log_message,get_config,read_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

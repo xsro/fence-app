@@ -73,8 +73,12 @@ const TabbedInterface: React.FC = () => {
     </div>
   )};
 
+  const [JsonFile, setJsonFile] = useState<string>("");
+
+
   const handleDisplayDataChange:ChangeEventHandler<HTMLInputElement>=async function(h) {
     const value = h.target.value;
+    setJsonFile(value);
     try {
       const parsedData = await manager.read_json1(value);
       setDisplayData(parsedData);
@@ -86,7 +90,7 @@ const TabbedInterface: React.FC = () => {
 
   const DisplayTabContent = () => (
     <div className="p-6 bg-white rounded-b-lg shadow-md">
-      <Input onChange={handleDisplayDataChange}></Input>
+      <Input onChange={handleDisplayDataChange} value={JsonFile}></Input>
       <div className="mt-4 bg-gray-100 h-64 rounded flex items-center justify-center">
         <TrajectoryVisualization data={displayData}/>
       </div>

@@ -44,11 +44,15 @@ export class SimulationManager implements ManagerAPI {
 
     public async read_json1(path: string) {
         try {
-            const lines = await readTextFileLines(path);
-            const data=[]
-            for await (const line of lines) {
-                data.push(JSON.parse(line));
-            }  
+            const text:string = await invoke("read_file",{path});
+            let data=[];
+            try {
+                data = JSON.parse(text);
+            }
+            catch (e) {
+                this.log(`Error parsing JSON from ${path}:`+ e);
+                throw e;
+            }
             return data;
         } catch (error) {
             console.error(`Error reading JSON from ${path}:`, error);
