@@ -40,14 +40,16 @@ fn mas_exited(name:String) -> Result<String,String> {
 
 
 #[tauri::command]
-fn read_stdout(name: String) -> String {
+fn read_stdout(name: String) ->Result<String,String> {
     let manager = MANAGER.lock().expect("Failed to lock PythonProcessManager");
-    let out=manager.read(&name);
-    if out.is_err() {
-        return format!("Failed to read stdout for process '{}'", name);
-    }
-    let output = out.unwrap();
-    output.unwrap_or_else(|| String::from("No output available or process not found"))
+    let out=manager.read_all(&name).map_err(|e| {
+        println!("Failed to read stdout for process '{}': {}", name, e);
+        format!("Failed to read stdout for process '{}': {}", name, e)
+    })?;
+    out.ok_or_else(|| {
+        println!("No output available for process '{}'", name);
+        format!("No output available for process '{}'", name)
+    })
 }
 
 #[tauri::command]

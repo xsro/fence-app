@@ -101,20 +101,17 @@ export class SimulationManager {
         const name = "update_profiles" + Math.random().toString(36).substring(2, 15);
         await invoke("exec_mas", { name, args: "simulate list" });
         const outputPromise = new Promise<string>((resolve, reject) => {
-            let output = "";
-            let exited = 100;
-            const id = setInterval(async () => {
-                output += await this.read_stdout(name);
-                const exitedMsg = await invoke("mas_exited", { name });
-                if (exitedMsg === "true") {
-                    exited--;
-                }
-                if (exited <= 0) {
-                    clearInterval(id);
-                    resolve(output);
-                }
-            }
-                , 1000);
+            setTimeout(() => {
+                invoke("read_stdout", { name })
+                    .then((result) => {
+                        if (typeof result !== "string") {
+                            reject(new Error("Expected string result from command, got: " + typeof result));
+                        } else {
+                            resolve(result);
+                        }
+                    })
+                    .catch(reject);
+            }, 10000);
         });
         const result = await outputPromise;
 
