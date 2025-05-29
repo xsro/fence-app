@@ -1,27 +1,22 @@
-import React, { useState } from 'react';
+import React, { ChangeEventHandler, useState } from 'react';
 import './index.css'; // Tailwind CSS configuration
 import TrajectoryVisualization from './TrajectoryVisualization';
-import {SimulationManager,template_data} from "./client/main"
-import { Button } from '@mui/material';
+import {SimulationManager,template_data} from "./client/tauri"
+import { Button,Input } from '@mui/material';
 
 type TabName = 'simulate' | 'status' | 'display' | 'debug';
 
 const TabbedInterface: React.FC = () => {
+  const manager = new SimulationManager();
   const [activeTab, setActiveTab] = useState<TabName>('simulate');
 
 
   const [profiles, setProfiles] = useState<string[]>([]);
   const [displayData, setDisplayData] = useState<any[]>(template_data);
 
-  function handleUpdateProfiles() {
-    SimulationManager.getInstance().updateProfiles()
-      .then(() => {
-        console.log("Profiles updated successfully",SimulationManager.getInstance().profiles);
-        setProfiles(Object.keys(SimulationManager.getInstance().profiles));
-      })
-      .catch((error) => {
-        console.error("Error updating profiles:", error);
-      });
+  async function handleUpdateProfiles() {
+    const profiles=await manager.listAllProfiles()
+    setProfiles(profiles);
   }
 
   const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
@@ -30,8 +25,7 @@ const TabbedInterface: React.FC = () => {
       console.error("No profile selected for simulation.");
       return;
     }
-    const manager= SimulationManager.getInstance();
-    await manager.simulate(selectedProfile, manager.profiles[selectedProfile].path);
+    await manager.startSimulation(selectedProfile,selectedProfile);
   }
 
   // Tab content components (replace with your actual content)
@@ -75,21 +69,24 @@ const TabbedInterface: React.FC = () => {
       <p>Monitor system health and performance metrics. {status}</p>
       {/* Add status indicators and metrics */}
       <div className="mt-4 grid grid-cols-2 gap-4">
-        {
-          Object.entries(SimulationManager.getInstance().simulationProcess).map(([name, output]) => (
-            <div key={name} className="p-4 bg-gray-100 rounded shadow">
-              <h3 className="font-semibold">{name}</h3>
-              <pre className="text-sm text-gray-700 whitespace-pre-wrap">{output}</pre>
-            </div>
-          ))
-        }
       </div>
     </div>
   )};
 
+  const handleDisplayDataChange:ChangeEventHandler<HTMLInputElement>=async function(h) {
+    const value = h.target.value;
+    try {
+      const parsedData = await manager.read_json1(value);
+      setDisplayData(parsedData);
+    } catch (error) {
+      console.error("Invalid JSON data:", error);
+      setDisplayData([]);
+    }
+  }
+
   const DisplayTabContent = () => (
     <div className="p-6 bg-white rounded-b-lg shadow-md">
-      <h2 className="text-xl font-bold mb-4">Data Visualization</h2>
+      <Input onChange={handleDisplayDataChange}></Input>
       <div className="mt-4 bg-gray-100 h-64 rounded flex items-center justify-center">
         <TrajectoryVisualization data={displayData}/>
       </div>
@@ -102,7 +99,6 @@ const TabbedInterface: React.FC = () => {
 [12:34:58] INFO: Agents loaded successfully
 [12:34:59] DEBUG: Step 1 completed
 [12:35:00] DEBUG: Step 2 completed`);
-      SimulationManager.setLog=setLog;
     return (
     <div className="p-6 bg-white rounded-b-lg shadow-md">
       <h2 className="text-xl font-bold mb-4">Debug Console</h2>
