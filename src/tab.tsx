@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './index.css'; // Tailwind CSS configuration
 import TrajectoryVisualization from './TrajectoryVisualization';
-import {SimulationManager} from "./client/main"
+import {SimulationManager,template_data} from "./client/main"
 import { Button } from '@mui/material';
 
 type TabName = 'simulate' | 'status' | 'display' | 'debug';
@@ -11,6 +11,8 @@ const TabbedInterface: React.FC = () => {
 
 
   const [profiles, setProfiles] = useState<string[]>([]);
+  const [displayData, setDisplayData] = useState<any[]>(template_data);
+
   function handleUpdateProfiles() {
     SimulationManager.getInstance().updateProfiles()
       .then(() => {
@@ -24,7 +26,6 @@ const TabbedInterface: React.FC = () => {
 
   const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
   async function handleSimulate() {
-    debugger
     if (!selectedProfile) {
       console.error("No profile selected for simulation.");
       return;
@@ -90,7 +91,7 @@ const TabbedInterface: React.FC = () => {
     <div className="p-6 bg-white rounded-b-lg shadow-md">
       <h2 className="text-xl font-bold mb-4">Data Visualization</h2>
       <div className="mt-4 bg-gray-100 h-64 rounded flex items-center justify-center">
-        <TrajectoryVisualization/>
+        <TrajectoryVisualization data={displayData}/>
       </div>
     </div>
   );

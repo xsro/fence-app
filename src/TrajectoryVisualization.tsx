@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Chart, registerables } from 'chart.js';
 import './TrajectoryVisualization.css';
-import {getTemplateData} from './client/main';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStepBackward, faPlay, faStepForward, faPause } from '@fortawesome/free-solid-svg-icons';
 
@@ -23,7 +22,7 @@ interface AgentDataPoint {
 
 // 组件属性定义
 interface TrajectoryVisualizationProps {
-  url?: URL; // 数据源URL
+  data: AgentDataPoint[];
   width?: number;
   height?: number;
   showAgents?: boolean;
@@ -36,7 +35,7 @@ interface TrajectoryVisualizationProps {
 
 // 轨迹可视化组件
 const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
-  url= undefined,
+  data,
   width = 800,
   height = 600,
   showAgents = true,
@@ -46,7 +45,6 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
   autoPlay = false,
   playSpeed = 500
 }) => {
-  const data=getTemplateData(url);
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstance = useRef<Chart | null>(null);
   const animationFrame = useRef<number | null>(null);
@@ -325,7 +323,7 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
         <div className="time-display">
           {data.length > 0 && (
             <span>
-              时间: {formatTime(data[currentDataIndex].time[data[currentDataIndex].time.length - 1])}s
+              时间: {formatTime(data[currentDataIndex].time)}s
               &nbsp;&nbsp;({currentDataIndex + 1}/{data.length})
             </span>
           )}
