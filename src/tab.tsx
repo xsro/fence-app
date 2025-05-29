@@ -23,18 +23,14 @@ const TabbedInterface: React.FC = () => {
   }
 
   const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
-  function handleSimulate() {
+  async function handleSimulate() {
+    debugger
     if (!selectedProfile) {
       console.error("No profile selected for simulation.");
       return;
     }
-    SimulationManager.getInstance().simulate(selectedProfile, SimulationManager.getInstance().profiles[selectedProfile].path)
-      .then(() => {
-        console.log("Simulation started for profile:", selectedProfile);
-      })
-      .catch((error) => {
-        console.error("Error starting simulation:", error);
-      });
+    const manager= SimulationManager.getInstance();
+    await manager.simulate(selectedProfile, manager.profiles[selectedProfile].path);
   }
 
   // Tab content components (replace with your actual content)
@@ -51,6 +47,7 @@ const TabbedInterface: React.FC = () => {
             console.log("Selected profile:", selectedProfile);
             setSelectedProfile(selectedProfile || null);
           }}
+          value={selectedProfile || ''}
         >
           <option value="">-- Select a profile --</option>
           {profiles.map((profile) => (
@@ -65,23 +62,29 @@ const TabbedInterface: React.FC = () => {
     </div>
   );
 
-  const StatusTabContent = () => (
+  const StatusTabContent = () => {
+    const [status, setStatus] = useState<number>(Date.now());
+    setInterval(() => {
+      setStatus(Date.now());
+    }, 1000);
+    
+    return(
     <div className="p-6 bg-white rounded-b-lg shadow-md">
       <h2 className="text-xl font-bold mb-4">System Status</h2>
-      <p>Monitor system health and performance metrics.</p>
+      <p>Monitor system health and performance metrics. {status}</p>
       {/* Add status indicators and metrics */}
       <div className="mt-4 grid grid-cols-2 gap-4">
-        <div className="bg-gray-100 p-3 rounded">
-          <p className="text-sm text-gray-500">CPU Usage</p>
-          <p className="text-lg font-semibold">25%</p>
-        </div>
-        <div className="bg-gray-100 p-3 rounded">
-          <p className="text-sm text-gray-500">Memory</p>
-          <p className="text-lg font-semibold">4.2GB / 16GB</p>
-        </div>
+        {
+          Object.entries(SimulationManager.getInstance().simulationProcess).map(([name, output]) => (
+            <div key={name} className="p-4 bg-gray-100 rounded shadow">
+              <h3 className="font-semibold">{name}</h3>
+              <pre className="text-sm text-gray-700 whitespace-pre-wrap">{output}</pre>
+            </div>
+          ))
+        }
       </div>
     </div>
-  );
+  )};
 
   const DisplayTabContent = () => (
     <div className="p-6 bg-white rounded-b-lg shadow-md">

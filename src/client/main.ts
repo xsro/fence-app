@@ -36,7 +36,24 @@ export class SimulationManager{
         SimulationManager.setLog(this.logs);
     }
     
-    private constructor() {}
+    private constructor() {
+        setInterval(async () => {
+            for(const name in this.simulationProcess) {
+                const exited=await invoke("mas_exited", {name})
+                if (exited==="true") {
+                    continue
+                }
+
+                const result = await invoke("read_stdout", {name});
+                if (typeof result !== "string") {
+                    this.setLog("Error reading stdout for " + name + ": Expected string, got " + typeof result);
+                    continue;
+                }
+                this.simulationProcess[name] += result;
+            }
+        }, 1000);
+    }
+
 
     public static getInstance(): SimulationManager {
         if (!SimulationManager.instance) {
@@ -45,9 +62,11 @@ export class SimulationManager{
         return SimulationManager.instance;
     }
 
+    public simulationProcess: Record<string, string> = {};
     public async simulate(name:string,path:string) {
         const result=await invoke("exec_mas", {name,args: "simulate "+path});
         this.setLog("Simulation started: " + name + " with path: " + path);
+        this.simulationProcess[name] = "";
     }
 
     public async read_stdout(name:string){
@@ -79,7 +98,7 @@ export class SimulationManager{
                     resolve(output);
                 }
             }
-            , 100);
+            , 1000);
         });
         const result = await outputPromise;
         
