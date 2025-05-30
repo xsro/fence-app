@@ -47,21 +47,9 @@ const TabMetric = (props: TabMetricProps) => {
             backgroundColor: 'rgba(75, 192, 192, 0.5)',
         });
     }
-
-    function updateButtonHandler() {
-        const path=document.getElementById("json-source-path") as HTMLInputElement;
-        if (path === null) {
-            console.error("Path input element not found");
-            return;
-        }
-        simulationData.source_path = path.value;
-        simulationData.update_data()
-    }
     return (
         <div>
             <h2 className="text-xl font-bold mb-4">Metric Visualization {simulationData.id}</h2>
-            <input type="text" id="json-source-path"></input>
-            <button onClick={updateButtonHandler}>update</button>
             <Line data={data} options={options} />
             {/* 这里是组件内容 */}
         </div>

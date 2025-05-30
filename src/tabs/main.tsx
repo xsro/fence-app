@@ -31,6 +31,16 @@ const TabbedInterface: React.FC = () => {
         }
     };
 
+    function updateButtonHandler() {
+            const path=document.getElementById("json-source-path") as HTMLInputElement;
+            if (path === null) {
+                console.error("Path input element not found");
+                return;
+            }
+            simulationData.source_path = path.value;
+            simulationData.update_data()
+        }
+
     return (
         <div className="max-w-6xl mx-auto mt-8">
             <div className="mb-4">
@@ -48,7 +58,10 @@ const TabbedInterface: React.FC = () => {
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
+                        
                     ))}
+                    <input type="text" id="json-source-path"></input>
+                                <button onClick={updateButtonHandler}>update</button>
                 </div>
             </div>
 
