@@ -3,13 +3,14 @@ import { Chart, registerables } from 'chart.js';
 import './TrajectoryVisualization.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faStepBackward, faPlay, faStepForward, faPause } from '@fortawesome/free-solid-svg-icons';
+import { Slider } from '@mui/material';
 
 // 注册Chart.js组件
 Chart.register(...registerables);
 
 // 数据类型定义
 interface AgentDataPoint {
-  time: number[];
+  time: number;
   state: {
     agents: [number, number][];
     target: [number, number];
@@ -50,39 +51,39 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
   const animationFrame = useRef<number | null>(null);
   const [currentDataIndex, setCurrentDataIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
-  
+
   // 格式化时间显示
   const formatTime = (time: number) => time.toFixed(1);
-  
+
   // 创建或更新图表
   const updateChart = useCallback(() => {
     if (!chartRef.current || !data.length) return;
-    
+
     const currentData = data[currentDataIndex];
     if (!currentData) return;
-    
+
     const ctx = chartRef.current.getContext('2d');
     if (!ctx) return;
-    
+
     // 销毁现有图表
     if (chartInstance.current) {
       chartInstance.current.destroy();
     }
-    
+
     // 准备数据集
     const datasets: any[] = [];
-    
+
     // 添加 Agents
     if (showAgents && currentData.state.agents.length > 0) {
       const agentCount = currentData.state.agents.length;
-      
+
       for (let i = 0; i < agentCount; i++) {
         const agentPositions = currentData.state.agents;
-        
+
         // 轨迹线
         if (showTrails) {
           datasets.push({
-            label: `Agent ${i+1} 轨迹`,
+            label: `Agent ${i + 1} 轨迹`,
             data: agentPositions.map(pos => ({ x: pos[0], y: pos[1] })),
             borderColor: getAgentColor(i).border,
             borderWidth: 2,
@@ -92,10 +93,10 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
             order: 1
           });
         }
-        
+
         // 当前位置
         datasets.push({
-          label: `Agent ${i+1}`,
+          label: `Agent ${i + 1}`,
           data: [{ x: agentPositions[i][0], y: agentPositions[i][1] }],
           backgroundColor: getAgentColor(i).fill,
           borderColor: getAgentColor(i).border,
@@ -106,11 +107,11 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
         });
       }
     }
-    
+
     // 添加 Target
     if (showTarget) {
       const targetPositions = currentData.state.target;
-      
+
       // 轨迹线
       if (showTrails) {
         datasets.push({
@@ -124,7 +125,7 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
           order: 1
         });
       }
-      
+
       // 当前位置
       datasets.push({
         label: 'Target',
@@ -138,7 +139,7 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
         order: 3
       });
     }
-    
+
     // 创建新图表
     chartInstance.current = new Chart(ctx, {
       type: 'scatter',
@@ -189,7 +190,7 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
           },
           tooltip: {
             callbacks: {
-              label: function(context) {
+              label: function (context) {
                 let label = context.dataset.label || '';
                 if (label) {
                   label += ': ';
@@ -204,18 +205,18 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
         }
       }
     });
-    
+
     // 调整坐标轴范围
     adjustChartScale();
   }, [data, currentDataIndex, showAgents, showTarget, showTrails, zoomLevel]);
-  
+
   // 调整图表缩放和范围
   const adjustChartScale = useCallback(() => {
     if (!chartInstance.current) return;
-    
+
     const xValues: number[] = [];
     const yValues: number[] = [];
-    
+
     // 收集所有点的坐标
     chartInstance.current.data.datasets.forEach(dataset => {
       dataset.data.forEach((point: { x: number; y: number }) => {
@@ -223,28 +224,28 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
         yValues.push(point.y);
       });
     });
-    
+
     if (!xValues.length || !yValues.length) return;
-    
+
     const xMin = Math.min(...xValues) - 2;
     const xMax = Math.max(...xValues) + 2;
     const yMin = Math.min(...yValues) - 2;
     const yMax = Math.max(...yValues) + 2;
-    
+
     const xRange = xMax - xMin;
     const yRange = yMax - yMin;
-    
+
     // 应用缩放
     chartInstance.current.options.scales.x.min = xMin - xRange * (zoomLevel - 1) / 2;
     chartInstance.current.options.scales.x.max = xMax + xRange * (zoomLevel - 1) / 2;
     chartInstance.current.options.scales.y.min = yMin - yRange * (zoomLevel - 1) / 2;
     chartInstance.current.options.scales.y.max = yMax + yRange * (zoomLevel - 1) / 2;
-     chartInstance.current.options.scales.x.position = 'bottom';
+    chartInstance.current.options.scales.x.position = 'bottom';
     chartInstance.current.options.scales.y.position = 'left';
-    
+
     chartInstance.current.update();
   }, [zoomLevel]);
-  
+
   // 获取 Agent 颜色
   const getAgentColor = useCallback((index: number) => {
     const colors = [
@@ -256,33 +257,33 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
     ];
     return colors[index % colors.length];
   }, []);
-  
+
   // 播放/暂停动画
   const togglePlay = useCallback(() => {
     setIsPlaying(prev => !prev);
   }, []);
-  
+
   // 跳转到上一帧
   const prevFrame = useCallback(() => {
     setCurrentDataIndex(prev => Math.max(0, prev - 1));
   }, []);
-  
+
   // 跳转到下一帧
   const nextFrame = useCallback(() => {
     setCurrentDataIndex(prev => Math.min(data.length - 1, prev + 1));
   }, [data.length]);
-  
+
   // 生命周期钩子
   useEffect(() => {
     updateChart();
   }, [updateChart]);
-  
+
   useEffect(() => {
     if (chartInstance.current) {
       adjustChartScale();
     }
   }, [adjustChartScale]);
-  
+
   // 自动播放动画
   useEffect(() => {
     if (isPlaying && data.length > 1) {
@@ -292,17 +293,17 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
           play();
         }, playSpeed);
       };
-      
+
       play();
     }
-    
+
     return () => {
       if (animationFrame.current) {
         window.clearTimeout(animationFrame.current);
       }
     };
   }, [isPlaying, data.length, playSpeed]);
-  
+
   // 清理函数
   useEffect(() => {
     return () => {
@@ -314,10 +315,10 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
       }
     };
   }, []);
-  
+
   return (
     <div className="trajectory-visualization">
-      
+
       {/* 控制面板 */}
       <div className="control-panel">
         <div className="time-display">
@@ -328,18 +329,18 @@ const TrajectoryVisualization: React.FC<TrajectoryVisualizationProps> = ({
             </span>
           )}
         </div>
-        
+        <Slider size="small" min={data[0].time} max={data[data.length - 1].time} value={data[currentDataIndex].time}></Slider>
         <div className="buttons">
           <button onClick={prevFrame} disabled={currentDataIndex === 0} className="control-button">
-            <FontAwesomeIcon icon={faStepBackward} /> 
+            <FontAwesomeIcon icon={faStepBackward} />
           </button>
-          
+
           <button onClick={togglePlay} className="control-button play-button">
-            <FontAwesomeIcon icon={isPlaying?faPause:faPlay} /> 
+            <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
           </button>
-          
+
           <button onClick={nextFrame} disabled={currentDataIndex === data.length - 1} className="control-button">
-            <FontAwesomeIcon icon={faStepForward} /> 
+            <FontAwesomeIcon icon={faStepForward} />
           </button>
         </div>
       </div>
