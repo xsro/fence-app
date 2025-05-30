@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import './index.css'; // Tailwind CSS configuration
 import TrajectoryVisualization from './components/TrajectoryVisualization';
-import {SimulationManager,template_data} from "./client/main"
+import { SimulationManager, template_data } from "./client/main"
 import { Button } from '@mui/material';
-import ThreeVisualization from './components/ThreeVisualization';
+import ThreeVisualization, { RawData } from './components/ThreeVisualization';
 
-type TabName = 'simulate' | 'status' | 'display' |'display3D' | 'debug';
+type TabName = 'simulate' | 'status' | 'metric' | 'display' | 'display3D' | 'debug';
 
 const TabbedInterface: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabName>('simulate');
@@ -17,7 +17,7 @@ const TabbedInterface: React.FC = () => {
   function handleUpdateProfiles() {
     SimulationManager.getInstance().updateProfiles()
       .then(() => {
-        console.log("Profiles updated successfully",SimulationManager.getInstance().profiles);
+        console.log("Profiles updated successfully", SimulationManager.getInstance().profiles);
         setProfiles(Object.keys(SimulationManager.getInstance().profiles));
       })
       .catch((error) => {
@@ -31,7 +31,7 @@ const TabbedInterface: React.FC = () => {
       console.error("No profile selected for simulation.");
       return;
     }
-    const manager= SimulationManager.getInstance();
+    const manager = SimulationManager.getInstance();
     await manager.simulate(selectedProfile, manager.profiles[selectedProfile].path);
   }
 
@@ -69,87 +69,99 @@ const TabbedInterface: React.FC = () => {
     setInterval(() => {
       setStatus(Date.now());
     }, 1000);
-    
-    return(
-    <div className="p-6 bg-white rounded-b-lg shadow-md">
-      <h2 className="text-xl font-bold mb-4">System Status</h2>
-      <p>Monitor system health and performance metrics. {status}</p>
-      {/* Add status indicators and metrics */}
-      <div className="mt-4 grid grid-cols-2 gap-4">
-        {
-          Object.entries(SimulationManager.getInstance().simulationProcess).map(([name, output]) => (
-            <div key={name} className="p-4 bg-gray-100 rounded shadow">
-              <h3 className="font-semibold">{name}</h3>
-              <pre className="text-sm text-gray-700 whitespace-pre-wrap">{output}</pre>
-            </div>
-          ))
-        }
+
+    return (
+      <div className="p-6 bg-white rounded-b-lg shadow-md">
+        <h2 className="text-xl font-bold mb-4">System Status</h2>
+        <p>Monitor system health and performance metrics. {status}</p>
+        {/* Add status indicators and metrics */}
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          {
+            Object.entries(SimulationManager.getInstance().simulationProcess).map(([name, output]) => (
+              <div key={name} className="p-4 bg-gray-100 rounded shadow">
+                <h3 className="font-semibold">{name}</h3>
+                <pre className="text-sm text-gray-700 whitespace-pre-wrap">{output}</pre>
+              </div>
+            ))
+          }
+        </div>
       </div>
-    </div>
-  )};
+    )
+  };
 
   const DisplayTabContent = () => (
     <div className="p-6 bg-white rounded-b-lg shadow-md">
-      <h2 className="text-xl font-bold mb-4">Data Visualization</h2>
-      <div className="mt-4 bg-gray-100 h-64 rounded flex items-center justify-center">
-        <TrajectoryVisualization data={displayData}/>
-      </div>
+      <TrajectoryVisualization data={displayData} />
     </div>
   );
 
   const initialData = {
-  "time": 1224,
-  "states": {
-    "agents": [
-      [-5.3037484976478536E+6, 2.8271055703376069E+9, 2.0983113824583027E+9],
-      [-4.0448892187886987E+9, 2.4726725177355709E+9, 1.8360161405891685E+9],
-      [-3.5941442888785629E+9, 5.9926459368107319E+9, 1.632011291665508E+9],
-      [-7.4180197256643418E+6, 5.3926538702144041E+9, 1.4688129670446687E+9]
-    ],
-    "agents_v": [
-      [-8528.7737910265823, 4.6181165613174811E+6, 5.140807596450951E+6],
-      [-6.6093145683105942E+6, 4.0399985492269853E+6, 4.4981996090753432E+6],
-      [-5.8733916735937158E+6, 9.7921626108197141E+6, 3.9983988206763035E+6],
-      [-12155.490295826894, 8.8123517858602181E+6, 3.598561230720913E+6]
-    ],
-    "target": [-78.2725160192479, 200.56129357027316, 244.8]
-  }
-};
+    "time": 8000,
+    "states": {
+      "agents":
+        [[-2.1311073773114517E+8, 1.2069914096762993E+11, 5.8525306454640344E+11], [-1.7278629741713E+11, 1.0560494434295116E+11, 5.1209595702648682E+11], [-1.5355789362783624E+11, 2.5599977057555887E+11, 4.5519677128198407E+11], [-3.132551533866725E+8, 2.3039503126982193E+11, 4.0967711248968274E+11]],
+      "agents_v": [[-53235.672285767971, 3.0173352570964493E+7, 2.1945618334471539E+8], [-4.3196663003053263E+7, 2.6400837519144114E+7, 1.9202397764100683E+8], [-3.8390142766567037E+7, 6.4000117440146595E+7, 1.7068813551377028E+8], [-78414.687226170412, 5.7599509165378571E+7, 1.5361932425450519E+8]],
+      "target": [-78.567605512173, 200.82699334313273, 1600]
+    }
+  };
 
+  const [display3DData, setDisplay3DData] = useState<Array<RawData>>([initialData]);
+  const [display3DDataIndex, setDisplay3DDataIndex] = useState<number>(0);
   const Display3DTabContent = () => (
     <div className="p-6 bg-white rounded-b-lg shadow-md">
-      <h2 className="text-xl font-bold mb-4">Data Visualization</h2>
+      <input type="file" accept=".json" onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            try {
+              const data = JSON.parse(event.target?.result as string);
+              setDisplay3DData(data);
+            } catch (error) {
+              console.error("Error parsing JSON file:", error);
+            }
+          };
+          reader.readAsText(file);
+        }
+      }} className="mb-4 p-2 border border-gray-300 rounded" />
+      <input type='number' value={display3DDataIndex} className="mb-4 p-2 border border-gray-300 rounded" max={display3DData.length-1} onChange={(e)=>{
+        const index = parseInt(e.target.value, 10);
+        if (!isNaN(index) && index >= 0 && index < display3DData.length) {
+          setDisplay3DDataIndex(index);
+        }
+      }}/>
       <div style={{ width: '800px', height: '600px', margin: 'auto' }}>
-        <ThreeVisualization 
-        width={800} 
-        height={600} 
-        data={initialData} 
-      />
+        <ThreeVisualization
+          width={800}
+          height={600}
+          data={display3DData[display3DDataIndex]}
+        />
       </div>
     </div>
   );
 
   const DebugTabContent = () => {
-    const [log,setLog]=useState(`[12:34:56] INFO: Simulation started
+    const [log, setLog] = useState(`[12:34:56] INFO: Simulation started
 [12:34:57] DEBUG: Initializing environment...
 [12:34:58] INFO: Agents loaded successfully
 [12:34:59] DEBUG: Step 1 completed
 [12:35:00] DEBUG: Step 2 completed`);
-      SimulationManager.setLog=setLog;
+    SimulationManager.setLog = setLog;
     return (
-    <div className="p-6 bg-white rounded-b-lg shadow-md">
-      <h2 className="text-xl font-bold mb-4">Debug Console</h2>
-      <p>View system logs and debug information.</p>
-      {/* Add debug console or logs */}
-      <div className="mt-4 bg-gray-900 text-gray-100 p-4 rounded h-64 overflow-auto">
-        <pre>
-          <code>
-            {log}
-          </code>
-        </pre>
+      <div className="p-6 bg-white rounded-b-lg shadow-md">
+        <h2 className="text-xl font-bold mb-4">Debug Console</h2>
+        <p>View system logs and debug information.</p>
+        {/* Add debug console or logs */}
+        <div className="mt-4 bg-gray-900 text-gray-100 p-4 rounded h-64 overflow-auto">
+          <pre>
+            <code>
+              {log}
+            </code>
+          </pre>
+        </div>
       </div>
-    </div>
-  )};
+    )
+  };
 
   // Render tab content based on active tab
   const renderTabContent = () => {
@@ -170,18 +182,17 @@ const TabbedInterface: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto mt-8">
       <div className="mb-4">
-        
+
         {/* Tab navigation */}
         <div className="flex border-b">
           {['simulate', 'status', 'display', 'display3D', 'debug'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab as TabName)}
-              className={`py-2 px-4 font-medium border-b-2 ${
-                activeTab === tab
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } transition-colors`}
+              className={`py-2 px-4 font-medium border-b-2 ${activeTab === tab
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } transition-colors`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>

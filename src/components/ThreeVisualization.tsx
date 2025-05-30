@@ -13,7 +13,7 @@ interface NormalizedData {
   agents: Point[];
 }
 
-interface RawData {
+export interface RawData {
   time: number;
   states: {
     agents: number[][];
