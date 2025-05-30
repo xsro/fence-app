@@ -13,14 +13,14 @@ const TabDisplay2d = (props: TabDisplay2dProps) => {
     const data = {
         datasets: [{
             label: '智能体',
-            data: simulationData.data[time_id].state.agents.map((item) => ({ x: item[0], y: item[1] })),
+            data: simulationData.data[time_id].states.agents.map((item) => ({ x: item[0], y: item[1] })),
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1
         },
         {
             label: '目标点',
-            data: [simulationData.data[time_id].state.target].map((item) => ({ x: item[0], y: item[1] })),
+            data: [simulationData.data[time_id].states.target].map((item) => ({ x: item[0], y: item[1] })),
             backgroundColor: 'rgba(255, 99, 132, 0.2)',
             borderColor: 'rgba(255, 99, 132, 1)',
             borderWidth: 1

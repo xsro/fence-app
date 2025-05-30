@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import TabMetric from './TabMetric';
 import { simulationData } from '../client/data';
 import TabDisplay2d from './TabDisplay2d';
+import TabDisplay3d from './TabDisplay3d';
 
 
 type TabName = 'simulate' | 'status' | 'metric' | 'display' | 'display3D' | 'debug';
@@ -24,7 +25,7 @@ const TabbedInterface: React.FC = () => {
             case 'display':
                 return <TabDisplay2d data_id={dataid}/>;
             case 'display3D':
-                return <div className="p-6 bg-white rounded-b-lg shadow-md">5</div>;
+                return <TabDisplay3d data_id={dataid}/>;
             case 'debug':
                 return <div className="p-6 bg-white rounded-b-lg shadow-md">6</div>;
         }
