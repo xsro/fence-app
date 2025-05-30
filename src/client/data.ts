@@ -23,7 +23,7 @@ export const template_data = [
 ];
 
 export class SimulationData {
-  private data: Array<FenceDataType> = [];
+  data: Array<FenceDataType> = [];
   source_path: string = "";
   id=0;
   update_id_event:Array<()=>void>=[];
@@ -95,9 +95,10 @@ export class SimulationData {
         return avgPosition.map(coord => coord / count);
     });
     const offset:Array<Array<number>>=[[],[],[]];
-    for (const average_position of average_positions) {
+    for (const time_idx in average_positions) {
+      const average_position = average_positions[time_idx];
       for (let i = 0; i < average_position.length; i++) {
-        offset[i].push(average_position[i]);
+        offset[i].push(average_position[i]- this.data[time_idx].state.target[i]);
       }
     }
     return offset;

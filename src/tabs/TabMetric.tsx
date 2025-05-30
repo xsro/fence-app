@@ -23,7 +23,7 @@ const TabMetric = (props: TabMetricProps) => {
 
 
     const data = {
-        labels: simulationData.get_time(),
+        labels: simulationData.get_time().map((item) => item.toFixed(2)),
         datasets: [
             {
                 label: 'x',
