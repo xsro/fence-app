@@ -14,7 +14,7 @@ import { Line,Scatter } from 'react-chartjs-2';
 import { Menu, MenuItem, Button, Divider } from '@mui/material';
 import styled from '@emotion/styled';
 // import { useTheme } from '@mui/material/styles';
-import TrajectoryVisualization from './TrajectoryVisualization';
+import TrajectoryVisualization from './components/TrajectoryVisualization';
 import * as client from './client/main';
 import TabbedInterface from './tab';
 
