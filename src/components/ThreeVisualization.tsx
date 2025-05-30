@@ -134,7 +134,7 @@ const ThreeVisualization: React.FC<ThreeVisualizationProps> = ({
     const agentGeometry = new THREE.SphereGeometry(20, 32, 32);
     const agentMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
 
-    const agentMeshs=normalizedData.agents.map(agentPos => {
+    const agentMeshs = normalizedData.agents.map(agentPos => {
       const agentMesh = new THREE.Mesh(agentGeometry, agentMaterial);
       agentMesh.position.set(agentPos.x, agentPos.y, agentPos.z);
       scene.current && scene.current.add(agentMesh);
@@ -150,10 +150,11 @@ const ThreeVisualization: React.FC<ThreeVisualizationProps> = ({
 
     // 动画循环
     const animate = () => {
-       const normalizedData = normalizeData(simulationData.data[simulationData.time_id]); 
+      
+      const normalizedData = normalizeData(simulationData.data[simulationData.time_id]);
       const target = normalizedData.target;
       targetMesh.position.set(target.x, target.y, target.z);
-      normalizedData.agents.forEach((agentPos,idx) => {
+      normalizedData.agents.forEach((agentPos, idx) => {
         agentMeshs[idx].position.set(agentPos.x, agentPos.y, agentPos.z);
       });
       animationFrameId.current = requestAnimationFrame(animate);
