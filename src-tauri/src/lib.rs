@@ -57,12 +57,25 @@ fn read_file(path: String) -> Result<String, String> {
     std::fs::read_to_string(path).map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn read_file_line(path:String,from:u32,to:u32,reverse:bool)->Result<Vec<String>,String>{
+    let a=if reverse{
+        utils::fs::read_lines_range_from_end(path, from, to)
+    }else{
+        utils::fs::read_lines_range(path, from, to)
+    };
+    match  a{
+        Ok(vec)=>Ok(vec),
+        Err(e)=>Err(format!("{}",e)),
+    }
+}
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet,exec_mas,mas_exited,read_stdout,read_file])
+        .invoke_handler(tauri::generate_handler![greet,exec_mas,mas_exited,read_stdout,read_file,read_file_line])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -31,6 +31,16 @@ const TabbedInterface: React.FC = () => {
         }
     };
 
+    function updatePushButtonHandler() {
+            const path=document.getElementById("json-source-path") as HTMLInputElement;
+            if (path === null) {
+                console.error("Path input element not found");
+                return;
+            }
+            simulationData.source_path = path.value;
+            simulationData.update_data(true)
+        }
+
     function updateButtonHandler() {
             const path=document.getElementById("json-source-path") as HTMLInputElement;
             if (path === null) {
@@ -38,7 +48,7 @@ const TabbedInterface: React.FC = () => {
                 return;
             }
             simulationData.source_path = path.value;
-            simulationData.update_data()
+            simulationData.update_data(true,true)
         }
 
     return (
@@ -61,7 +71,8 @@ const TabbedInterface: React.FC = () => {
                         
                     ))}
                     <input type="text" id="json-source-path"></input>
-                                <button onClick={updateButtonHandler}>update</button>
+                    <button onClick={updateButtonHandler}>update</button>
+                    <button onClick={updatePushButtonHandler}>update-push</button>
                 </div>
             </div>
 

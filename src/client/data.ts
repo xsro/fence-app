@@ -41,13 +41,20 @@ export class SimulationData {
     return this.data.every(item => item.states.agents.every(agent => agent.length === 3));
   }
 
-  public async update_data(){
-    const data_ = await invoke("read_file", { path: this.source_path });
+  public async update_data(push=false,all=false){
+    let data_:string[] =[];
+    if (all){
+      const data_text = await invoke("read_file", { path: this.source_path });
+      data_= (data_text as string).split(",\n")
+    }
+    else{
+      data_= await invoke("read_file_line", { path: this.source_path ,from:1,to:100,reverse:true});
+    }
     const data=[]
-    for (const line of (data_ as string).split(",\n")) {
+    for (const line of data_) {
       let a = undefined;
       try {
-        a = JSON.parse(line.trim());
+        a = JSON.parse(line.trim().replace(/,\s*$/, ''));
       } catch (e) {
         console.warn("Error parsing line:", line, e);
       }
@@ -63,7 +70,11 @@ export class SimulationData {
       }
     }
     
-    this.data = data as Array<FenceDataType>;
+    if (push){
+      this.data.push(...data);
+    }else{
+      this.data = data as Array<FenceDataType>;
+    }
     this.id++;
     this.update_id_event.forEach(callback => callback());
     return true;

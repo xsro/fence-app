@@ -27,18 +27,7 @@ interface ThreeVisualizationProps {
   height: number;
 }
 
-const ThreeVisualization: React.FC<ThreeVisualizationProps> = ({
-  width,
-  height,
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scene = useRef<THREE.Scene | null>(null);
-  const camera = useRef<THREE.PerspectiveCamera | null>(null);
-  const renderer = useRef<THREE.WebGLRenderer | null>(null);
-  const controls = useRef<OrbitControls | null>(null);
-  const animationFrameId = useRef<number | null>(null);
-
-  // 处理非常大的坐标值
+// 处理非常大的坐标值
   const normalizeData = (data: RawData): NormalizedData => {
     const target = data.states.target;
     const agents = data.states.agents;
@@ -80,9 +69,39 @@ const ThreeVisualization: React.FC<ThreeVisualizationProps> = ({
     };
   };
 
+const ThreeVisualization: React.FC<ThreeVisualizationProps> = ({
+  width,
+  height,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scene = useRef<THREE.Scene | null>(null);
+  const camera = useRef<THREE.PerspectiveCamera | null>(null);
+  const renderer = useRef<THREE.WebGLRenderer | null>(null);
+  const controls = useRef<OrbitControls | null>(null);
+  const animationFrameId = useRef<number | null>(null);
+
+  
+
+  const transformData= (data: RawData): NormalizedData => {
+    const target = data.states.target;
+    const agents = data.states.agents;
+    return {
+      target: {
+        x: target[0],
+        y: target[1],
+        z: target[2],
+      },
+      agents: agents.map(agent => ({
+        x: agent[0],
+        y: agent[1],
+        z: agent[2]
+      }))
+    };
+  };
 
 
-  const normalizedData = normalizeData(simulationData.data[simulationData.time_id]); // 获取最新数据进行归一化
+
+  const normalizedData = transformData(simulationData.data[simulationData.time_id]); // 获取最新数据进行归一化
   useEffect(() => {
 
     // 清理之前的场景
@@ -151,7 +170,7 @@ const ThreeVisualization: React.FC<ThreeVisualizationProps> = ({
     // 动画循环
     const animate = () => {
       
-      const normalizedData = normalizeData(simulationData.data[simulationData.time_id]);
+      const normalizedData = transformData(simulationData.data[simulationData.time_id]);
       const target = normalizedData.target;
       targetMesh.position.set(target.x, target.y, target.z);
       normalizedData.agents.forEach((agentPos, idx) => {
