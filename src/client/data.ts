@@ -44,12 +44,20 @@ export class SimulationData {
   public async update_data(push=false,all=false){
     let data_:string[] =[];
     if (all){
-      const data_text = await invoke("read_file", { path: this.source_path });
-      data_= (data_text as string).split(",\n")
+      try{
+        const data_text = await invoke("read_file", { path: this.source_path }).catch(console.error);
+        data_= (data_text as string).split(",\n")
+      }
+      catch(e){
+        console.log(e)
+      }
     }
     else{
-      data_= await invoke("read_file_line", { path: this.source_path ,from:1,to:100,reverse:true});
+      const data_text = await invoke("read_file_line", { path: this.source_path ,from:1,to:100,reverse:true}).catch(console.error) as string;
+      data_= (data_text as string).split(",\n")
     }
+    if(!Array.isArray(data_))return
+    
     const data=[]
     for (const line of data_) {
       let a = undefined;

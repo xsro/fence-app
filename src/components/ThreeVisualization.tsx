@@ -28,46 +28,64 @@ interface ThreeVisualizationProps {
 }
 
 // 处理非常大的坐标值
-  const normalizeData = (data: RawData): NormalizedData => {
-    const target = data.states.target;
-    const agents = data.states.agents;
+const normalizeData = (data: RawData): NormalizedData => {
+  const target = data.states.target;
+  const agents = data.states.agents;
 
-    // 提取坐标范围
-    const allPoints = [...agents, target];
-    const min = [Infinity, Infinity, Infinity];
-    const max = [-Infinity, -Infinity, -Infinity];
+  // 提取坐标范围
+  const allPoints = [...agents, target];
+  const min = [Infinity, Infinity, Infinity];
+  const max = [-Infinity, -Infinity, -Infinity];
 
-    allPoints.forEach(point => {
-      for (let i = 0; i < 3; i++) {
-        min[i] = Math.min(min[i], point[i]);
-        max[i] = Math.max(max[i], point[i]);
-      }
-    });
+  allPoints.forEach(point => {
+    for (let i = 0; i < 3; i++) {
+      min[i] = Math.min(min[i], point[i]);
+      max[i] = Math.max(max[i], point[i]);
+    }
+  });
 
-    // 计算范围和中心
-    const range = [max[0] - min[0], max[1] - min[1], max[2] - min[2]];
-    const center = [
-      (max[0] + min[0]) / 2,
-      (max[1] + min[1]) / 2,
-      (max[2] + min[2]) / 2
-    ];
+  // 计算范围和中心
+  const range = [max[0] - min[0], max[1] - min[1], max[2] - min[2]];
+  const center = [
+    (max[0] + min[0]) / 2,
+    (max[1] + min[1]) / 2,
+    (max[2] + min[2]) / 2
+  ];
 
-    // 归一化函数
-    const scale = 1000 / Math.max(...range); // 缩放因子，使场景适合显示
+  // 归一化函数
+  const scale = 1000 / Math.max(...range); // 缩放因子，使场景适合显示
 
-    return {
-      target: {
-        x: (target[0] - center[0]) * scale,
-        y: (target[1] - center[1]) * scale,
-        z: (target[2] - center[2]) * scale
-      },
-      agents: agents.map(agent => ({
-        x: (agent[0] - center[0]) * scale,
-        y: (agent[1] - center[1]) * scale,
-        z: (agent[2] - center[2]) * scale
-      }))
-    };
+  return {
+    target: {
+      x: (target[0] - center[0]) * scale,
+      y: (target[1] - center[1]) * scale,
+      z: (target[2] - center[2]) * scale
+    },
+    agents: agents.map(agent => ({
+      x: (agent[0] - center[0]) * scale,
+      y: (agent[1] - center[1]) * scale,
+      z: (agent[2] - center[2]) * scale
+    }))
   };
+};
+
+
+const transformData0 = (data: RawData): NormalizedData => {
+  const target = data.states.target;
+  const agents = data.states.agents;
+  return {
+    target: {
+      x: target[0],
+      y: target[1],
+      z: target[2],
+    },
+    agents: agents.map(agent => ({
+      x: agent[0],
+      y: agent[1],
+      z: agent[2]
+    }))
+  };
+};
 
 const ThreeVisualization: React.FC<ThreeVisualizationProps> = ({
   width,
@@ -80,24 +98,10 @@ const ThreeVisualization: React.FC<ThreeVisualizationProps> = ({
   const controls = useRef<OrbitControls | null>(null);
   const animationFrameId = useRef<number | null>(null);
 
-  
 
-  const transformData= (data: RawData): NormalizedData => {
-    const target = data.states.target;
-    const agents = data.states.agents;
-    return {
-      target: {
-        x: target[0],
-        y: target[1],
-        z: target[2],
-      },
-      agents: agents.map(agent => ({
-        x: agent[0],
-        y: agent[1],
-        z: agent[2]
-      }))
-    };
-  };
+
+
+  const transformData = normalizeData;
 
 
 
@@ -169,7 +173,7 @@ const ThreeVisualization: React.FC<ThreeVisualizationProps> = ({
 
     // 动画循环
     const animate = () => {
-      
+
       const normalizedData = transformData(simulationData.data[simulationData.time_id]);
       const target = normalizedData.target;
       targetMesh.position.set(target.x, target.y, target.z);

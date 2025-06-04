@@ -58,14 +58,14 @@ fn read_file(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn read_file_line(path:String,from:u32,to:u32,reverse:bool)->Result<Vec<String>,String>{
+fn read_file_line(path:String,from:u32,to:u32,reverse:bool)->Result<String,String>{
     let a=if reverse{
         utils::fs::read_lines_range_from_end(path, from, to)
     }else{
         utils::fs::read_lines_range(path, from, to)
     };
     match  a{
-        Ok(vec)=>Ok(vec),
+        Ok(vec)=>Ok(vec.join("\n")),
         Err(e)=>Err(format!("{}",e)),
     }
 }
