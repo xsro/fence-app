@@ -79,6 +79,13 @@ export class SimulationData {
     }
     
     if (push){
+      for(let i=this.data.length-1;i>0;i--){
+        if(this.data[i].time>data[0].time){
+          this.data.pop()
+        }else{
+          break
+        }
+      }
       this.data.push(...data);
     }else{
       this.data = data as Array<FenceDataType>;
