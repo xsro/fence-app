@@ -23,7 +23,15 @@ const TabDisplay2d = (props: TabDisplay2dProps) => {
     const agents = simulationData.data[time_id].states.agents.map((item, agent_index) => {
         return {
             label: `智能体 ${agent_index + 1} 轨迹`,
-            data: simulationData.data.map(d => d.states.agents[agent_index]).map((item) => ({ x: item[0], y: item[1] })),
+            data: simulationData.data.map((d) => {
+                const item=d.states.agents[agent_index]
+                if (Array.isArray(item)){
+                    return { x: item[0], y: item[1] }
+                }
+                else {
+                    return undefined; 
+                }
+            }),
             backgroundColor: colors_list[agent_index % colors_list.length],
             borderColor: colors_list[agent_index % colors_list.length],
             pointRadius: 1,
@@ -33,12 +41,12 @@ const TabDisplay2d = (props: TabDisplay2dProps) => {
     }
     );
 
-     const agents2 = simulationData.data[time_id].states.agents.map((item, agent_index) => {
+    const agents2 = simulationData.data[time_id].states.agents.map((item, agent_index) => {
         return {
             label: `智能体 ${agent_index + 1}`,
             data: [{ x: item[0], y: item[1] }],
             backgroundColor: colors_list[agent_index % colors_list.length],
-            borderColor:'rgba(16, 15, 16, 0.86)' ,
+            borderColor: 'rgba(16, 15, 16, 0.86)',
             pointStyle: 'circle',
             pointRadius: 6,
             pointBorderWidth: 2,
@@ -74,7 +82,7 @@ const TabDisplay2d = (props: TabDisplay2dProps) => {
         ]
     };
     const options = {
-        animation:false, // 禁用动画
+        animation: false, // 禁用动画
         responsive: false, // 响应式调整
         maintainAspectRatio: true, // 保持宽高比
         aspectRatio: 1, // 设置宽高比为1:1

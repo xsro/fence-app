@@ -48,7 +48,7 @@ const TabbedInterface: React.FC = () => {
                 return;
             }
             simulationData.source_path = path.value;
-            simulationData.update_data(true,true)
+            simulationData.update_data(false,true)
         }
 
     return (

@@ -92,6 +92,7 @@ export class SimulationData {
     }
     this.id++;
     this.update_id_event.forEach(callback => callback());
+    debugger
     return true;
   }
 
